@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Armed Bandit Problem Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        math {
+            display: block;
+            margin: 20px 0;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Multi-Armed Bandit Problem Analysis</h1>
+    <h2>Single Project Bandit Process</h2>
+    <p>
+        The Bellman equation for a single project bandit problem can be formulated as:
+    </p>
+    <math>
+        V(i;M) = \max\left[ M, R(i) + \alpha \sum_{k} P_{ik} V(k;M)\right].
+    </math>
+    <p>
+        It is easy to show that $V(i;M) - M$ is decreasing in $M$ and define $M(i)$ to be the smallest value of $M$ at which retirement at $i$ is optimal. This is related to the fair charge concept.
+    </p>
+    
+    <h2>Multi-Project Bandit Problem</h2>
+    <p>
+        Given the state $\textbf{i} = (i_1, i_2, \ldots, i_n)$, the Bellman equation for the multi-project bandit problem can be formulated as:
+    </p>
+    <math>
+        V(\textbf{i}; M) = \max \left[ M, \max_j O^j(V(\textbf{i}; M))\right],
+    </math>
+    <p>
+        where
+    </p>
+    <math>
+        O^j(V(\textbf{i}; M)) = R(i_j) + \alpha \sum_k V(i_1, \ldots, i_{j-1}, k, i_{j+1}, \ldots, i_n; M) P_{i_j k}.
+    </math>
+    <p>
+        It is easy to prove that $V(\textbf{i}; M)$ is an increasing and convex function of $M$ with:
+    </p>
+    <math>
+        \frac{\partial}{\partial M} V(\textbf{i}; M) = \E( \alpha^{T_M} \rvert X_0 = \textbf{i}),
+    </math>
+    <p>
+        where $T_M$ denotes the optimal retirement time under the policy for terminal reward $M$.
+    </p>
+    
+    <h3>Optimal Retirement Time</h3>
+    <p>
+        For a given initial state $\textbf{i}$, let $T^j$ denote the optimal retirement time when only project $j$ is available. Let $T$ denote the optimal retirement time for the multi-project case. Then:
+    </p>
+    <math>
+        T = \sum_j T^j,
+    </math>
+    <p>
+        By independence of $T^j$:
+    </p>
+    <math>
+        \E(\alpha^T) = \prod_j \E(\alpha^{T_j}),
+    </math>
+    <p>
+        and
+    </p>
+    <math>
+        \frac{\partial}{\partial M} V(\textbf{i}; M) = \prod_j \frac{\partial}{\partial M} V(i_j; M).
+    </math>
+    
+    <h3>Immediate Retirement Condition</h3>
+    <p>
+        Let $R(i) \leq (1-\alpha) C$. Hence, for $M \geq C$, it is optimal to retire immediately. That is:
+    </p>
+    <math>
+        V(\textbf{i}; M) = M, \text{ for } M \geq C.
+    </math>
+    <p>
+        Integrating both sides, we have:
+    </p>
+    <math>
+        V(\textbf{i}; M) = C - \int_{M}^{C} \prod_j \frac{\partial}{\partial M} V(i_j; m) \ud m.
+    </math>
+    
+    <h3>Verifying the Solution</h3>
+    <p>
+        Fix $j$, $j = 1, \ldots, n$ and define:
+    </p>
+    <math>
+        P_{j}(\textbf{i}; M) = \prod_{k \neq j} \frac{\partial}{\partial M} V(i_k; M).
+    </math>
+    <p>
+        We know that $P_{i}(\textbf{i}; M)$ is non-negative and increasing in $M$ and $P_{i}(\textbf{i}; M) = 1$ for $M \geq C$.
+    </p>
+    <p>
+        Let:
+    </p>
+    <math>
+        \hat V(\textbf{i}; M) = C - \int_{M}^{C} \left(\frac{\partial}{\partial m} V(i_j; m)\right) \cdot P_{j}(\textbf{i}; m) \ud m.
+    </math>
+    <p>
+        By integration by parts, we can rewrite it as:
+    </p>
+    <math>
+        \hat V(\textbf{i}; M) = P_{j}(\textbf{i}; M) V(i_j; M) +  \int_{M}^{C}  V(i_j; m) \ud P_{j}(\textbf{i}; m).
+    </math>
+    <p>
+        Similarly:
+    </p>
+    <math>
+        \begin{align*}
+            O^j(\hat V(\textbf{i}; M)) 
+            &= R(i_j) + \alpha \sum_k \hat V(i_1, \ldots, i_{j-1}, k, i_{j+1}, \ldots, i_n; M) P_{i_j k}\\
+            &= R(i_j) + \alpha \sum_k P_{i_j k}\left[P_{j}(\textbf{i}; M) V(k; M) +  \int_{M}^{C}  V(k; m) \ud P_{j}(\textbf{i}; m)\right].
+        \end{align*}
+    </math>
+    <p>
+        Then:
+    </p>
+    <math>
+        \begin{align*}
+            &\hat V(\textbf{i}; M) - O^j(\hat V(\textbf{i}; M))\\ 
+            &= P_{j}(\textbf{i}; M) \left[ V(i_j; M) - R(i_j) - \alpha  \sum_k P_{i_j k} V(k; M) \right]\\
+            &\quad + \left[\int_{M}^{C}  V(k; m) - \alpha  \sum_k P_{i_j k} V(k; m) - R(i_j) \ud P_{j}(\textbf{i}; m)\right].
+        </align*}
+    </math>
+    <p>
+        This proves the optimality of the index policy.
+    </p>
+</body>
+</html>
